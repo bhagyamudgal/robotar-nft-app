@@ -1,0 +1,7 @@
+body {
+	background-color: #1f1f1f;
+}
+
+.wallet-adapter-button:hover {
+	background-color: var(--chakra-colors-primary-700) !important;
+}
