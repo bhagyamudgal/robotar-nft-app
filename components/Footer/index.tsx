@@ -10,7 +10,7 @@ const Footer = () => {
 					target="_blank"
 					rel="noopener noreferrer"
 					_hover={{
-						color: "accent",
+						color: "primary.300",
 					}}
 				>
 					Bhagya Mudgal

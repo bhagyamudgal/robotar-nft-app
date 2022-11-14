@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { background, Button, HStack } from "@chakra-ui/react";
+import { Button, HStack, Link } from "@chakra-ui/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { shortenAddress } from "../../utils/general";
+import NextLink from "next/link";
 
 const Header = () => {
 	const [renderWalletButton, setRenderWalletButton] = useState(false);
@@ -13,7 +14,13 @@ const Header = () => {
 	}, []);
 
 	return (
-		<HStack p={5} w="full" justify="flex-end">
+		<HStack p={5} w="full" justify="flex-end" spacing={8}>
+			{connected && (
+				<Link as={NextLink} href="/my-nfts" color="text">
+					My NFTs
+				</Link>
+			)}
+
 			{renderWalletButton && (
 				<Button colorScheme="primary" as={WalletMultiButton}>
 					{connected

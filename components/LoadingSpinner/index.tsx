@@ -4,9 +4,14 @@ import React from "react";
 type Props = {
 	size?: string;
 	text?: string;
+	textColor?: string;
 };
 
-const LoadingSpinner = ({ size = "md", text }: Props) => {
+const LoadingSpinner = ({
+	size = "md",
+	text,
+	textColor = "primary.600",
+}: Props) => {
 	return (
 		<VStack spacing={3} justify="center">
 			<Spinner
@@ -18,7 +23,7 @@ const LoadingSpinner = ({ size = "md", text }: Props) => {
 			/>
 			{text && (
 				<Text
-					color="primary.600"
+					color={textColor}
 					fontSize="lg"
 					fontWeight="medium"
 					align="center"

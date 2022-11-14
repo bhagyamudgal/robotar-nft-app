@@ -10,6 +10,7 @@ import {
 } from "@chakra-ui/react";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { BsArrowRight } from "react-icons/bs";
 
 export default function Home() {
 	const { connected } = useWallet();
@@ -51,7 +52,10 @@ export default function Home() {
 
 					<Box p="4">
 						{connected ? (
-							<Button colorScheme="primary">
+							<Button
+								colorScheme="primary"
+								rightIcon={<BsArrowRight />}
+							>
 								Mint Robotar NFT
 							</Button>
 						) : (

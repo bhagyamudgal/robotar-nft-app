@@ -13,7 +13,7 @@ type Props = { children: ReactNode };
 
 const WalletContextProvider = ({ children }: Props) => {
 	const url = useMemo(() => clusterApiUrl("devnet"), []);
-	const wallets = [new PhantomWalletAdapter()];
+	const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
 
 	return (
 		<ConnectionProvider endpoint={url}>

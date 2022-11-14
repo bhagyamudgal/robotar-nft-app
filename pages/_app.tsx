@@ -33,8 +33,8 @@ const theme = extendTheme({ colors, fonts });
 
 export default function App({ Component, pageProps }: AppProps) {
 	return (
-		<ChakraProvider theme={theme}>
-			<WalletContextProvider>
+		<WalletContextProvider>
+			<ChakraProvider theme={theme}>
 				<Head>
 					<link rel="icon" href="/favicon.ico" />
 				</Head>
@@ -51,7 +51,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
 					<Footer />
 				</VStack>
-			</WalletContextProvider>
-		</ChakraProvider>
+			</ChakraProvider>
+		</WalletContextProvider>
 	);
 }
