@@ -157,12 +157,16 @@ export default function Home() {
 				</VStack>
 			);
 		} else if (candyMachine && candyMachineDetails) {
+			const areNftsSoldOut =
+				candyMachineDetails.mintedNfts ===
+				candyMachineDetails.totalNfts;
 			return (
 				<VStack spacing={4}>
-					{candyMachineDetails.mintedNfts ===
-					candyMachineDetails.totalNfts ? (
+					{areNftsSoldOut ? (
 						<Text color="red.400" fontSize="xl">
-							Robotar NFTs Minted: SOLD OUT
+							Robotar NFTs Minted:{" "}
+							{candyMachineDetails.mintedNfts}/
+							{candyMachineDetails.totalNfts}
 						</Text>
 					) : (
 						<Text color="green.400" fontSize="xl">
@@ -179,9 +183,10 @@ export default function Home() {
 					<Button
 						colorScheme="primary"
 						isLoading={isMintingNft}
+						isDisabled={areNftsSoldOut}
 						onClick={mintNft}
 					>
-						Mint Robotar NFT
+						{areNftsSoldOut ? "SOLD OUT" : "Mint Robotar NFT"}
 					</Button>
 				</VStack>
 			);
