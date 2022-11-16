@@ -7,13 +7,186 @@ import {
 	Text,
 	Heading,
 	Button,
+	Link,
 } from "@chakra-ui/react";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { BsArrowRight } from "react-icons/bs";
+import { useEffect, useMemo, useState } from "react";
+import {
+	CandyMachineV2,
+	Metaplex,
+	NftWithToken,
+	walletAdapterIdentity,
+} from "@metaplex-foundation/js";
+import { CANDY_MACHINE_ID } from "../utils/env";
+import { PublicKey } from "@solana/web3.js";
+import NFTCard from "../components/NFTCard";
+import {
+	showErrorToast,
+	showSuccessToast,
+} from "../components/ToastNotification";
+
+type CandyMachineDetails = {
+	price: number;
+	currency: string;
+	totalNfts: number;
+	mintedNfts: number;
+};
 
 export default function Home() {
-	const { connected } = useWallet();
+	const wallet = useWallet();
+	const { connection } = useConnection();
+
+	const [isFetchingCandyMachine, setIsFetchingCandyMachine] = useState(false);
+	const [isMintingNft, setIsMintingNft] = useState(false);
+	const [isMintCompleted, setIsMintCompleted] = useState(false);
+	const [candyMachine, setCandyMachine] = useState<CandyMachineV2>();
+	const [candyMachineDetails, setCandyMachineDetails] =
+		useState<CandyMachineDetails>();
+	const [mintedNft, setMintedNft] = useState<NftWithToken | null>(null);
+
+	const metaplex = useMemo(() => {
+		return Metaplex.make(connection).use(walletAdapterIdentity(wallet));
+	}, [connection, wallet]);
+
+	const getCandyMachine = async () => {
+		setIsFetchingCandyMachine(true);
+		try {
+			const candyMachine = await metaplex
+				.candyMachinesV2()
+				.findByAddress({ address: new PublicKey(CANDY_MACHINE_ID) });
+
+			const price =
+				candyMachine.price.basisPoints.toNumber() /
+				10 ** candyMachine.price.currency.decimals;
+
+			const currency = candyMachine.price.currency.symbol;
+
+			const totalNfts = candyMachine.itemsAvailable.toNumber();
+
+			const mintedNfts = candyMachine.itemsMinted.toNumber();
+
+			const candyMachineDetails = {
+				price,
+				currency,
+				totalNfts,
+				mintedNfts,
+			};
+
+			setCandyMachine(candyMachine);
+			setCandyMachineDetails(candyMachineDetails);
+		} catch (error) {
+			console.error("getCandyMachine =>", error);
+		}
+		setIsFetchingCandyMachine(false);
+	};
+
+	useEffect(() => {
+		if (wallet.connected) {
+			getCandyMachine();
+		}
+	}, [wallet.connected]); //eslint-disable-line
+
+	const mintNft = async () => {
+		if (!wallet.connected || !candyMachine) {
+			setIsMintingNft(false);
+			return;
+		}
+
+		setIsMintingNft(true);
+
+		try {
+			const mintResponse = await metaplex
+				.candyMachinesV2()
+				.mint({ candyMachine });
+
+			setMintedNft(mintResponse.nft);
+			setIsMintCompleted(true);
+
+			const solscanLink = `https://solscan.io/tx/${mintResponse.response.signature}?cluster=devnet`;
+
+			showSuccessToast({
+				id: "mint-nft",
+				description: (
+					<VStack align="left" spacing={1}>
+						<Text>NFT minted successfully!</Text>
+						<Link
+							href={solscanLink}
+							target="_blank"
+							rel="noopener noreferrer"
+							textDecoration="underline"
+						>
+							View Transaction
+						</Link>
+					</VStack>
+				),
+				duration: 15000,
+			});
+		} catch (error) {
+			console.error("mintNft =>", error);
+			showErrorToast({
+				id: "mint-nft",
+				description: "Something went wrong while minting NFT!",
+			});
+		}
+
+		setIsMintingNft(false);
+	};
+
+	const renderCandyMachine = () => {
+		if (isFetchingCandyMachine) {
+			return <LoadingSpinner size="lg" text="Loading Candy Machine" />;
+		} else if (isMintCompleted && mintedNft) {
+			return (
+				<VStack spacing={10}>
+					<Heading as="h3" size="lg" color="primary.400">
+						Here is your newly minted Robotar NFT
+					</Heading>
+					<NFTCard nftDetails={mintedNft} />
+					<Button
+						colorScheme="primary"
+						onClick={() => {
+							setIsMintCompleted(false);
+							setMintedNft(null);
+							getCandyMachine();
+						}}
+					>
+						Mint Another Robotar NFT
+					</Button>
+				</VStack>
+			);
+		} else if (candyMachine && candyMachineDetails) {
+			return (
+				<VStack spacing={4}>
+					{candyMachineDetails.mintedNfts ===
+					candyMachineDetails.totalNfts ? (
+						<Text color="red.400" fontSize="xl">
+							Robotar NFTs Minted: SOLD OUT
+						</Text>
+					) : (
+						<Text color="green.400" fontSize="xl">
+							Robotar NFTs Minted:{" "}
+							{candyMachineDetails.mintedNfts}/
+							{candyMachineDetails.totalNfts}
+						</Text>
+					)}
+
+					<Text color="primary.400" fontSize="xl">
+						Robotar NFT Price: {candyMachineDetails.price}{" "}
+						{candyMachineDetails.currency}
+					</Text>
+					<Button
+						colorScheme="primary"
+						isLoading={isMintingNft}
+						onClick={mintNft}
+					>
+						Mint Robotar NFT
+					</Button>
+				</VStack>
+			);
+		}
+	};
 
 	return (
 		<Box w="full" px={5}>
@@ -51,13 +224,8 @@ export default function Home() {
 					</Text>
 
 					<Box p="4">
-						{connected ? (
-							<Button
-								colorScheme="primary"
-								rightIcon={<BsArrowRight />}
-							>
-								Mint Robotar NFT
-							</Button>
+						{wallet.connected ? (
+							renderCandyMachine()
 						) : (
 							<Text
 								color="primary.500"

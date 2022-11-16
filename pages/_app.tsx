@@ -7,6 +7,7 @@ import { extendTheme } from "@chakra-ui/react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import WalletContextProvider from "../context/WalletContextProvider";
+import ToastNotification from "../components/ToastNotification";
 
 const colors = {
 	background: "#1F1F1F",
@@ -51,6 +52,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
 					<Footer />
 				</VStack>
+				<ToastNotification />
 			</ChakraProvider>
 		</WalletContextProvider>
 	);

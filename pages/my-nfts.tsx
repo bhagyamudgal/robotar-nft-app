@@ -16,18 +16,17 @@ import {
 	walletAdapterIdentity,
 } from "@metaplex-foundation/js";
 import { getSolanaConnection } from "../utils/general";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { COLLECTION_NFT_ADDRESS } from "../utils/env";
 import LoadingSpinner from "../components/LoadingSpinner";
 import NFTCard from "../components/NFTCard";
 import NextLink from "next/link";
 import { BsArrowLeft } from "react-icons/bs";
 
-const connection = getSolanaConnection();
-
 const MyNfts = () => {
 	const router = useRouter();
 	const wallet = useWallet();
+	const { connection } = useConnection();
 
 	const [isFetchingNftsFromWallet, setIsFetchingNftsFromWallet] =
 		useState(false);
